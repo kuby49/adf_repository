@@ -1,0 +1,21 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "SynapseDataFactory-6zvtj"
+		},
+		"OperationalSQL_NYCDataSets_connectionString": {
+			"value": ""
+		},
+		"SynapseSQL_SynapseDW_connectionString": {
+			"value": ""
+		},
+		"synapsedatalake_connectionString": {
+			"value": ""
+		},
+		"MDWResources_sasUri": {
+			"value": ""
+		}
+	}
+}
