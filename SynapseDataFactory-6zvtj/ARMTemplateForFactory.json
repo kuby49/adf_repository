@@ -200,6 +200,56 @@
 								"parameters": {}
 							}
 						]
+					},
+					{
+						"name": "Data flow1",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "Copy Taxi Data Files",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Copy Taxi Location Lookup",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "TransformNYCTaxiData",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"TaxiDataFiles": {},
+									"TaxiLocationLookup": {},
+									"TaxiDataSummary": {}
+								}
+							},
+							"staging": {
+								"linkedService": {
+									"referenceName": "synapsedatalake",
+									"type": "LinkedServiceReference"
+								},
+								"folderPath": "polybase"
+							},
+							"integrationRuntime": {
+								"referenceName": "MappingDataFlowsIR",
+								"type": "IntegrationRuntimeReference"
+							},
+							"traceLevel": "Fine"
+						}
 					}
 				],
 				"annotations": []
@@ -209,7 +259,9 @@
 				"[concat(variables('factoryId'), '/datasets/SynapseDataLake_NYCTaxiData_Binary')]",
 				"[concat(variables('factoryId'), '/datasets/NYCDataSets_NYCTaxiLocationLookup')]",
 				"[concat(variables('factoryId'), '/datasets/SynapseDW_NYCTaxiLocationLookup')]",
-				"[concat(variables('factoryId'), '/linkedServices/synapsedatalake')]"
+				"[concat(variables('factoryId'), '/dataflows/TransformNYCTaxiData')]",
+				"[concat(variables('factoryId'), '/linkedServices/synapsedatalake')]",
+				"[concat(variables('factoryId'), '/integrationRuntimes/MappingDataFlowsIR')]"
 			]
 		},
 		{
