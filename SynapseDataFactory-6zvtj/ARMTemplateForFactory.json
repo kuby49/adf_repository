@@ -129,6 +129,9 @@
 					"referenceName": "OperationalSQL_NYCDataSets",
 					"type": "LinkedServiceReference"
 				},
+				"folder": {
+					"name": "Lab1"
+				},
 				"annotations": [],
 				"type": "AzureSqlTable",
 				"schema": [
@@ -320,6 +323,9 @@
 					"referenceName": "SynapseSQL_SynapseDW",
 					"type": "LinkedServiceReference"
 				},
+				"folder": {
+					"name": "Lab1"
+				},
 				"annotations": [],
 				"type": "AzureSqlDWTable",
 				"schema": [],
@@ -458,6 +464,9 @@
 					"referenceName": "synapsedatalake",
 					"type": "LinkedServiceReference"
 				},
+				"folder": {
+					"name": "Lab2"
+				},
 				"annotations": [],
 				"type": "Binary",
 				"typeProperties": {
@@ -479,6 +488,9 @@
 				"linkedServiceName": {
 					"referenceName": "synapsedatalake",
 					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Lab2"
 				},
 				"annotations": [],
 				"type": "DelimitedText",
