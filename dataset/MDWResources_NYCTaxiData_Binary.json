@@ -1,0 +1,18 @@
+{
+	"name": "MDWResources_NYCTaxiData_Binary",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "MDWResources",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"container": "nyctaxidata"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

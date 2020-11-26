@@ -1,0 +1,17 @@
+{
+	"name": "SynapseDW_MotorVehicleCollisions",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SynapseSQL_SynapseDW",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlDWTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "NYC",
+			"table": "NYPD_MotorVehicleCollisions"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
