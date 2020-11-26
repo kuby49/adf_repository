@@ -1,6 +1,6 @@
 {
     "name": "SynapseDataLake_NYCTaxiData_CSV",
-    "properties": {
+    "properties": { 
         "linkedServiceName": {
             "referenceName": "SynapseDataLake",
             "type": "LinkedServiceReference"
