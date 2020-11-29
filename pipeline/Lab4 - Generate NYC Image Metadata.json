@@ -116,7 +116,10 @@
 							"typeProperties": {
 								"notebookPath": "/Users/eruskal@microsoft.com/NYCImageMetadata-Lab",
 								"baseParameters": {
-									"nycImageUrl": "@concat(variables('ImageMetadataContainerUrl'), item().name)"
+									"nycImageUrl": {
+										"value": "@concat(variables('ImageMetadataContainerUrl'),item().name)",
+										"type": "Expression"
+									}
 								}
 							},
 							"linkedServiceName": {
