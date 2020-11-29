@@ -1,0 +1,20 @@
+{
+	"name": "NYC_Curated",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "NyC_Curated",
+						"type": "DatasetReference"
+					},
+					"name": "NyC_Curated"
+				}
+			],
+			"sinks": [],
+			"transformations": [],
+			"script": "source(output(\n\t\tVendorID as integer,\n\t\tPickUpDate as date,\n\t\tPickUpDateTime as timestamp,\n\t\tDropOffDate as date,\n\t\tDropOffDateTime as timestamp,\n\t\tPassengerCount as integer,\n\t\tTripDistance as double,\n\t\tPickUpLocationID as integer,\n\t\tPickUpLocationZone as string,\n\t\tPickUpLocationBorough as string,\n\t\tDropOffLocationID as integer,\n\t\tDropOffLocationZone as string,\n\t\tDropOffLocationBorough as string,\n\t\tPaymentTypeID as integer,\n\t\tPaymentTypeDescription as string,\n\t\tFareAmount as decimal(8,2),\n\t\tExtraAmount as decimal(8,2),\n\t\tMTATaxAmount as decimal(8,2),\n\t\tTipAmount as decimal(8,2),\n\t\tTollsAmount as decimal(8,2),\n\t\tImprovementSurchargeAmount as decimal(8,2),\n\t\tTotalRideAmount as decimal(8,2),\n\t\tPickUpYearMonth as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tformat: 'parquet',\n\twildcardPaths:['*']) ~> NyC_Curated"
+		}
+	}
+}
