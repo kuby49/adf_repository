@@ -184,7 +184,7 @@
 		"variables": {
 			"ImageMetadataContainerUrl": {
 				"type": "String",
-				"defaultValue": "https://synapsedatalake6zvtj.blob.core.windows.net/nycimages/ I"
+				"defaultValue": "https://synapsedatalake6zvtj.blob.core.windows.net/nycimages/"
 			}
 		},
 		"annotations": []
