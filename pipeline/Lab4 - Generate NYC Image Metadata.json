@@ -112,10 +112,70 @@
 								"secureOutput": false,
 								"secureInput": false
 							},
-							"userProperties": []
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/Users/eruskal@microsoft.com/NYCImageMetadata-Lab",
+								"baseParameters": {
+									"nycImageUrl": "@concat(variables('ImageMetadataContainerUrl'), item().name)"
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "ADPDatabricks",
+								"type": "LinkedServiceReference"
+							}
 						}
 					]
 				}
+			},
+			{
+				"name": "ServeImageMetadata",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "ForEachImage",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"wildcardFileName": "*.json"
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"sink": {
+						"type": "CosmosDbSqlApiSink",
+						"writeBehavior": "insert"
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "SynapseDataLake_NYCImageMetadata_JSON",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ADPCosmosDB_NYCImageMetadata",
+						"type": "DatasetReference"
+					}
+				]
 			}
 		],
 		"variables": {
