@@ -1,0 +1,20 @@
+{
+    "name": "SynapseDataLake_NYCImageMetadata_JSON",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "SynapseDataLake",
+            "type": "LinkedServiceReference"
+        },
+        "folder": {
+            "name": "Lab4"
+        },
+        "annotations": [],
+        "type": "Json",
+        "typeProperties": {
+            "location": {
+                "type": "AzureBlobStorageLocation",
+                "container": "nycimagemetadata"
+            }
+        }
+    }
+}
