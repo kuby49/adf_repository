@@ -5,6 +5,12 @@
 		"factoryName": {
 			"value": "SynapseDataFactory-6zvtj"
 		},
+		"ADPCosmosDB_connectionString": {
+			"value": ""
+		},
+		"ADPDatabricks_accessToken": {
+			"value": ""
+		},
 		"OperationalSQL_NYCDataSets_connectionString": {
 			"value": ""
 		},

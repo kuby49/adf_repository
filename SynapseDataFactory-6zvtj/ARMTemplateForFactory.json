@@ -7,6 +7,14 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "SynapseDataFactory-6zvtj"
 		},
+		"ADPCosmosDB_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ADPCosmosDB'"
+		},
+		"ADPDatabricks_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'ADPDatabricks'"
+		},
 		"OperationalSQL_NYCDataSets_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'OperationalSQL_NYCDataSets'"
@@ -262,6 +270,260 @@
 				"[concat(variables('factoryId'), '/dataflows/TransformNYCTaxiData')]",
 				"[concat(variables('factoryId'), '/linkedServices/synapsedatalake')]",
 				"[concat(variables('factoryId'), '/integrationRuntimes/MappingDataFlowsIR')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Lab4 - Generate NYC Image Metadata')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CopyImageFiles",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "BinarySource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true
+								},
+								"formatSettings": {
+									"type": "BinaryReadSettings"
+								}
+							},
+							"sink": {
+								"type": "BinarySink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings",
+									"copyBehavior": "PreserveHierarchy"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "MDWResources_NYCImages_Binary",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "SynapseDataLake_NYCImages_Binary",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "GetImageFileList",
+						"type": "GetMetadata",
+						"dependsOn": [
+							{
+								"activity": "CopyImageFiles",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "SynapseDataLake_NYCImages_Binary",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true
+							},
+							"formatSettings": {
+								"type": "BinaryReadSettings"
+							}
+						}
+					},
+					{
+						"name": "ForEachImage",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "GetImageFileList",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('GetImageFileList').output.childItems",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "GetImageMetadata",
+									"type": "DatabricksNotebook",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"notebookPath": "/Users/eruskal@microsoft.com/NYCImageMetadata-Lab",
+										"baseParameters": {
+											"nycImageUrl": {
+												"value": "@concat(variables('ImageMetadataContainerUrl'), item().name)",
+												"type": "Expression"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "ADPDatabricks",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "ServeImageMetadata",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "ForEachImage",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "JsonSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*.json"
+								},
+								"formatSettings": {
+									"type": "JsonReadSettings"
+								}
+							},
+							"sink": {
+								"type": "CosmosDbSqlApiSink",
+								"writeBehavior": "insert"
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "SynapseDataLake_NYCImageMetadata_JSON",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "ADPCosmosDB_NYCImageMetadata",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"variables": {
+					"ImageMetadataContainerUrl": {
+						"type": "String",
+						"defaultValue": "https://synapsedatalake6zvtj.blob.core.windows.net/nycimages/ I"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/MDWResources_NYCImages_Binary')]",
+				"[concat(variables('factoryId'), '/datasets/SynapseDataLake_NYCImages_Binary')]",
+				"[concat(variables('factoryId'), '/datasets/SynapseDataLake_NYCImageMetadata_JSON')]",
+				"[concat(variables('factoryId'), '/datasets/ADPCosmosDB_NYCImageMetadata')]",
+				"[concat(variables('factoryId'), '/linkedServices/ADPDatabricks')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ADPCosmosDB_NYCImageMetadata')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADPCosmosDB",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Lab4"
+				},
+				"annotations": [],
+				"type": "CosmosDbSqlApiCollection",
+				"schema": {},
+				"typeProperties": {
+					"collectionName": "ImageMetadata"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADPCosmosDB')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MDWResources_NYCImages_Binary')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "MDWResources",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Lab4"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": "nycimages"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/MDWResources')]"
 			]
 		},
 		{
@@ -759,6 +1021,57 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/SynapseDataLake_NYCImageMetadata_JSON')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "synapsedatalake",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Lab4"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": "nycimagemetadata"
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/synapsedatalake')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SynapseDataLake_NYCImages_Binary')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "synapsedatalake",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Lab4"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": "nycimages"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/synapsedatalake')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/SynapseDataLake_NYCTaxiData_Binary')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -885,6 +1198,37 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/synapsedatalake')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ADPCosmosDB')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "CosmosDb",
+				"typeProperties": {
+					"connectionString": "[parameters('ADPCosmosDB_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ADPDatabricks')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDatabricks",
+				"typeProperties": {
+					"domain": "https://adb-2310049397640933.13.azuredatabricks.net",
+					"accessToken": {
+						"type": "SecureString",
+						"value": "[parameters('ADPDatabricks_accessToken')]"
+					},
+					"existingClusterId": "1129-163845-ulnas319"
+				}
+			},
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/MDWResources')]",

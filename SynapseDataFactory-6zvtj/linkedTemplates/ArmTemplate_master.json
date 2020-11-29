@@ -7,6 +7,14 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "SynapseDataFactory-6zvtj"
 		},
+		"ADPCosmosDB_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ADPCosmosDB'"
+		},
+		"ADPDatabricks_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'ADPDatabricks'"
+		},
 		"OperationalSQL_NYCDataSets_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'OperationalSQL_NYCDataSets'"
@@ -50,6 +58,12 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
+					"ADPCosmosDB_connectionString": {
+						"value": "[parameters('ADPCosmosDB_connectionString')]"
+					},
+					"ADPDatabricks_accessToken": {
+						"value": "[parameters('ADPDatabricks_accessToken')]"
+					},
 					"OperationalSQL_NYCDataSets_connectionString": {
 						"value": "[parameters('OperationalSQL_NYCDataSets_connectionString')]"
 					},
@@ -65,6 +79,26 @@
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "SynapseDataFactory-6zvtj_ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'SynapseDataFactory-6zvtj_ArmTemplate_0')]"
+			]
 		}
 	]
 }
