@@ -4,6 +4,12 @@
 	"parameters": {
 		"factoryName": {
 			"value": "rip-data-factory"
+		},
+		"HttpSource_properties_typeProperties_url": {
+			"value": "https://raw.githubusercontent.com/djpmsft/adf-ready-demo/master/moviesDB.csv"
+		},
+		"ADLSSink_properties_typeProperties_url": {
+			"value": "https://awdlstudrip.dfs.core.windows.net"
 		}
 	}
 }
