@@ -1,0 +1,11 @@
+{
+	"name": "DBXPipeline",
+	"properties": {
+		"parameters": {
+			"Name": {
+				"type": "string"
+			}
+		},
+		"annotations": []
+	}
+}
