@@ -1,10 +1,6 @@
 {
 	"name": "SynapseDataLake_NYCTaxiData_CSV",
 	"properties": {
-		"linkedServiceName": {
-			"referenceName": "synapsedatalake",
-			"type": "LinkedServiceReference"
-		},
 		"folder": {
 			"name": "Lab2"
 		},
