@@ -125,7 +125,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "TransformNYCTaxiData",
+						"referenceName": "TransformNYCTaxiData2",
 						"type": "DataFlowReference"
 					},
 					"staging": {
