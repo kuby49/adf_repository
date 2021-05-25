@@ -227,6 +227,59 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/ExampleDataFlow')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ADLSSink",
+								"type": "DatasetReference"
+							},
+							"name": "ADLSSink"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "AzureSynapseAnalyticsTable1",
+								"type": "DatasetReference"
+							},
+							"name": "SynapseSink"
+						}
+					],
+					"transformations": [
+						{
+							"name": "SelectTest"
+						},
+						{
+							"name": "FilterTest"
+						},
+						{
+							"name": "WithPrimGenre"
+						},
+						{
+							"name": "WindowFunction"
+						},
+						{
+							"name": "AggregateExample"
+						},
+						{
+							"name": "AlterRow1"
+						}
+					],
+					"script": "source(output(\n\t\tmovie as string,\n\t\ttitle as string,\n\t\tgenres as string,\n\t\tyear as string,\n\t\tRating as string,\n\t\t{Rotton Tomato} as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tlimit: 100,\n\twildcardPaths:['output']) ~> ADLSSink\nADLSSink select(mapColumn(\n\t\tmovie,\n\t\ttitle,\n\t\tgenres,\n\t\tyear,\n\t\t{Rotten Tomato} = {Rotton Tomato}\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectTest\nSelectTest filter(toInteger(year) >1951) ~> FilterTest\nFilterTest derive(PrimaryGenre = iif (instr(genres, '|') == 0, genres, substring(genres,1,instr(genres, '|') - 1)),\n\t\tRottenTomato = toInteger({Rotten Tomato})) ~> WithPrimGenre\nWithPrimGenre window(over(year,\n\t\tPrimaryGenre),\n\tasc(RottenTomato, true),\n\tRatingsRank = rank()) ~> WindowFunction\nWindowFunction aggregate(groupBy(PrimaryGenre,\n\t\tyear),\n\tAverageRating = avg(RottenTomato),\n\t\tHighestRated = first(title),\n\t\tLowestRated = last(title),\n\t\tNumberOfMovies = count()) ~> AggregateExample\nAggregateExample alterRow(upsertIf(true())) ~> AlterRow1\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:false,\n\tupdateable:false,\n\tupsertable:true,\n\tkeys:['PrimaryGenre','year'],\n\tformat: 'table',\n\tstaged: true,\n\tallowCopyCommand: true,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> SynapseSink"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ADLSSink')]",
+				"[concat(variables('factoryId'), '/datasets/AzureSynapseAnalyticsTable1')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Pipeline')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -290,66 +343,58 @@
 								"parameters": {}
 							}
 						]
+					},
+					{
+						"name": "ExampleDataFlow",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "HttpToAdls",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "ExampleDataFlow",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"ADLSSink": {},
+									"SynapseSink": {}
+								}
+							},
+							"staging": {
+								"linkedService": {
+									"referenceName": "ADLSSink",
+									"type": "LinkedServiceReference"
+								},
+								"folderPath": "data/dw-staging"
+							},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
 					}
 				],
 				"annotations": []
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/HttpSource')]",
-				"[concat(variables('factoryId'), '/datasets/ADLSSink')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ExampleDataFlow')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "ADLSSink",
-								"type": "DatasetReference"
-							},
-							"name": "ADLSSink"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "AzureSynapseAnalyticsTable1",
-								"type": "DatasetReference"
-							},
-							"name": "SynapseSink"
-						}
-					],
-					"transformations": [
-						{
-							"name": "SelectTest"
-						},
-						{
-							"name": "FilterTest"
-						},
-						{
-							"name": "WithPrimGenre"
-						},
-						{
-							"name": "WindowFunction"
-						},
-						{
-							"name": "AggregateExample"
-						},
-						{
-							"name": "AlterRow1"
-						}
-					],
-					"script": "source(output(\n\t\tmovie as string,\n\t\ttitle as string,\n\t\tgenres as string,\n\t\tyear as string,\n\t\tRating as string,\n\t\t{Rotton Tomato} as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tlimit: 100,\n\twildcardPaths:['output']) ~> ADLSSink\nADLSSink select(mapColumn(\n\t\tmovie,\n\t\ttitle,\n\t\tgenres,\n\t\tyear,\n\t\t{Rotten Tomato} = {Rotton Tomato}\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectTest\nSelectTest filter(toInteger(year) >1951) ~> FilterTest\nFilterTest derive(PrimaryGenre = iif (instr(genres, '|') == 0, genres, substring(genres,1,instr(genres, '|') - 1)),\n\t\tRottenTomato = toInteger({Rotten Tomato})) ~> WithPrimGenre\nWithPrimGenre window(over(year,\n\t\tPrimaryGenre),\n\tasc(RottenTomato, true),\n\tRatingsRank = rank()) ~> WindowFunction\nWindowFunction aggregate(groupBy(PrimaryGenre,\n\t\tyear),\n\tAverageRating = avg(RottenTomato),\n\t\tHighestRated = first(title),\n\t\tLowestRated = last(title),\n\t\tNumberOfMovies = count()) ~> AggregateExample\nAggregateExample alterRow(upsertIf(true())) ~> AlterRow1\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:false,\n\tupdateable:false,\n\tupsertable:true,\n\tkeys:['PrimaryGenre','year'],\n\tformat: 'table',\n\tstaged: true,\n\tallowCopyCommand: true,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> SynapseSink"
-				}
-			},
-			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/ADLSSink')]",
-				"[concat(variables('factoryId'), '/datasets/AzureSynapseAnalyticsTable1')]"
+				"[concat(variables('factoryId'), '/dataflows/ExampleDataFlow')]",
+				"[concat(variables('factoryId'), '/linkedServices/ADLSSink')]"
 			]
 		}
 	]
