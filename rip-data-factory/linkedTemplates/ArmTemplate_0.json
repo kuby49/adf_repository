@@ -142,7 +142,7 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"notebookPath": "/adftutorial/mynotebook",
+							"notebookPath": "/Shared/adftutorial/mynotebook",
 							"baseParameters": {
 								"input": {
 									"value": "@pipeline().parameters.name",
@@ -157,7 +157,7 @@
 					}
 				],
 				"parameters": {
-					"Name": {
+					"name": {
 						"type": "string"
 					}
 				},
