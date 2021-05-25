@@ -30,9 +30,8 @@
 			}
 		],
 		"parameters": {
-			"input": {
-				"type": "string",
-				"defaultValue": "@pipeline().parameters.name"
+			"name": {
+				"type": "string"
 			}
 		},
 		"annotations": []
