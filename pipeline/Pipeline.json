@@ -88,7 +88,7 @@
 							"referenceName": "ADLSSink",
 							"type": "LinkedServiceReference"
 						},
-						"folderPath": ""
+						"folderPath": "data/dw-storage"
 					},
 					"compute": {
 						"coreCount": 8,
