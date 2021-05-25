@@ -88,13 +88,16 @@
 							"referenceName": "ADLSSink",
 							"type": "LinkedServiceReference"
 						},
-						"folderPath": "data/dw-staging"
+						"folderPath": ""
 					},
 					"compute": {
 						"coreCount": 8,
 						"computeType": "General"
 					},
-					"traceLevel": "Fine"
+					"traceLevel": "None",
+					"cacheSinks": {
+						"firstRowOnly": true
+					}
 				}
 			}
 		],
