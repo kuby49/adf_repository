@@ -7,13 +7,21 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "rip-data-factory"
 		},
-		"HttpSource_properties_typeProperties_url": {
-			"type": "string",
-			"defaultValue": "https://raw.githubusercontent.com/djpmsft/adf-ready-demo/master/moviesDB.csv"
+		"DWSynapseAnalytics_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'DWSynapseAnalytics'"
+		},
+		"DWSynapseAnalytics2_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'DWSynapseAnalytics2'"
 		},
 		"ADLSSink_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://awdlstudrip.dfs.core.windows.net"
+		},
+		"HttpSource_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://raw.githubusercontent.com/djpmsft/adf-ready-demo/master/moviesDB.csv"
 		},
 		"containerUri": {
 			"type": "string",
@@ -42,11 +50,17 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
-					"HttpSource_properties_typeProperties_url": {
-						"value": "[parameters('HttpSource_properties_typeProperties_url')]"
+					"DWSynapseAnalytics_connectionString": {
+						"value": "[parameters('DWSynapseAnalytics_connectionString')]"
+					},
+					"DWSynapseAnalytics2_connectionString": {
+						"value": "[parameters('DWSynapseAnalytics2_connectionString')]"
 					},
 					"ADLSSink_properties_typeProperties_url": {
 						"value": "[parameters('ADLSSink_properties_typeProperties_url')]"
+					},
+					"HttpSource_properties_typeProperties_url": {
+						"value": "[parameters('HttpSource_properties_typeProperties_url')]"
 					}
 				}
 			},

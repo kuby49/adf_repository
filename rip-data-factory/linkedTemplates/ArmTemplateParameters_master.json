@@ -5,11 +5,17 @@
 		"factoryName": {
 			"value": "rip-data-factory"
 		},
-		"HttpSource_properties_typeProperties_url": {
-			"value": "https://raw.githubusercontent.com/djpmsft/adf-ready-demo/master/moviesDB.csv"
+		"DWSynapseAnalytics_connectionString": {
+			"value": ""
+		},
+		"DWSynapseAnalytics2_connectionString": {
+			"value": ""
 		},
 		"ADLSSink_properties_typeProperties_url": {
 			"value": "https://awdlstudrip.dfs.core.windows.net"
+		},
+		"HttpSource_properties_typeProperties_url": {
+			"value": "https://raw.githubusercontent.com/djpmsft/adf-ready-demo/master/moviesDB.csv"
 		},
 		"containerUri": {
 			"value": ""

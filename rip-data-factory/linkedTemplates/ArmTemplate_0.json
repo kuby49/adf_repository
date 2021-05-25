@@ -7,13 +7,21 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "rip-data-factory"
 		},
-		"HttpSource_properties_typeProperties_url": {
-			"type": "string",
-			"defaultValue": "https://raw.githubusercontent.com/djpmsft/adf-ready-demo/master/moviesDB.csv"
+		"DWSynapseAnalytics_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'DWSynapseAnalytics'"
+		},
+		"DWSynapseAnalytics2_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'DWSynapseAnalytics2'"
 		},
 		"ADLSSink_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://awdlstudrip.dfs.core.windows.net"
+		},
+		"HttpSource_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://raw.githubusercontent.com/djpmsft/adf-ready-demo/master/moviesDB.csv"
 		}
 	},
 	"variables": {
@@ -21,20 +29,14 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/MappingDataFlowsIR')]",
-			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"name": "[concat(parameters('factoryName'), '/ADLSSink')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"type": "Managed",
+				"annotations": [],
+				"type": "AzureBlobFS",
 				"typeProperties": {
-					"computeProperties": {
-						"location": "AutoResolve",
-						"dataFlowProperties": {
-							"computeType": "General",
-							"coreCount": 16,
-							"timeToLive": 10
-						}
-					}
+					"url": "[parameters('ADLSSink_properties_typeProperties_url')]"
 				}
 			},
 			"dependsOn": []
@@ -55,17 +57,102 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/ADLSSink')]",
+			"name": "[concat(parameters('factoryName'), '/MappingDataFlowsIR')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 16,
+							"timeToLive": 10
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DWSynapseAnalytics')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"annotations": [],
-				"type": "AzureBlobFS",
+				"type": "AzureSqlDW",
 				"typeProperties": {
-					"url": "[parameters('ADLSSink_properties_typeProperties_url')]"
+					"connectionString": "[parameters('DWSynapseAnalytics_connectionString')]"
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DWSynapseAnalytics2')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('DWSynapseAnalytics2_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ADLSSink')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLSSink",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "output",
+						"fileSystem": "data"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "movie",
+						"type": "String"
+					},
+					{
+						"name": "title",
+						"type": "String"
+					},
+					{
+						"name": "genres",
+						"type": "String"
+					},
+					{
+						"name": "year",
+						"type": "String"
+					},
+					{
+						"name": "Rating",
+						"type": "String"
+					},
+					{
+						"name": "Rotton Tomato",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLSSink')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/HttpSource')]",
@@ -119,56 +206,24 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/ADLSSink')]",
+			"name": "[concat(parameters('factoryName'), '/AzureSynapseAnalyticsTable1')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"linkedServiceName": {
-					"referenceName": "ADLSSink",
+					"referenceName": "DWSynapseAnalytics2",
 					"type": "LinkedServiceReference"
 				},
 				"annotations": [],
-				"type": "DelimitedText",
+				"type": "AzureSqlDWTable",
+				"schema": [],
 				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"folderPath": "output",
-						"fileSystem": "data"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": [
-					{
-						"name": "movie",
-						"type": "String"
-					},
-					{
-						"name": "title",
-						"type": "String"
-					},
-					{
-						"name": "genres",
-						"type": "String"
-					},
-					{
-						"name": "year",
-						"type": "String"
-					},
-					{
-						"name": "Rating",
-						"type": "String"
-					},
-					{
-						"name": "Rotton Tomato",
-						"type": "String"
-					}
-				]
+					"schema": "dbo",
+					"table": "MovieRatings"
+				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ADLSSink')]"
+				"[concat(variables('factoryId'), '/linkedServices/DWSynapseAnalytics2')]"
 			]
 		},
 		{
@@ -242,6 +297,59 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/HttpSource')]",
 				"[concat(variables('factoryId'), '/datasets/ADLSSink')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ExampleDataFlow')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ADLSSink",
+								"type": "DatasetReference"
+							},
+							"name": "ADLSSink"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "AzureSynapseAnalyticsTable1",
+								"type": "DatasetReference"
+							},
+							"name": "SynapseSink"
+						}
+					],
+					"transformations": [
+						{
+							"name": "SelectTest"
+						},
+						{
+							"name": "FilterTest"
+						},
+						{
+							"name": "WithPrimGenre"
+						},
+						{
+							"name": "WindowFunction"
+						},
+						{
+							"name": "AggregateExample"
+						},
+						{
+							"name": "AlterRow1"
+						}
+					],
+					"script": "source(output(\n\t\tmovie as string,\n\t\ttitle as string,\n\t\tgenres as string,\n\t\tyear as string,\n\t\tRating as string,\n\t\t{Rotton Tomato} as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tlimit: 100,\n\twildcardPaths:['output']) ~> ADLSSink\nADLSSink select(mapColumn(\n\t\tmovie,\n\t\ttitle,\n\t\tgenres,\n\t\tyear,\n\t\t{Rotten Tomato} = {Rotton Tomato}\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectTest\nSelectTest filter(toInteger(year) >1951) ~> FilterTest\nFilterTest derive(PrimaryGenre = iif (instr(genres, '|') == 0, genres, substring(genres,1,instr(genres, '|') - 1)),\n\t\tRottenTomato = toInteger({Rotten Tomato})) ~> WithPrimGenre\nWithPrimGenre window(over(year,\n\t\tPrimaryGenre),\n\tasc(RottenTomato, true),\n\tRatingsRank = rank()) ~> WindowFunction\nWindowFunction aggregate(groupBy(PrimaryGenre,\n\t\tyear),\n\tAverageRating = avg(RottenTomato),\n\t\tHighestRated = first(title),\n\t\tLowestRated = last(title),\n\t\tNumberOfMovies = count()) ~> AggregateExample\nAggregateExample alterRow(upsertIf(true())) ~> AlterRow1\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:false,\n\tupdateable:false,\n\tupsertable:true,\n\tkeys:['PrimaryGenre','year'],\n\tformat: 'table',\n\tstaged: true,\n\tallowCopyCommand: true,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> SynapseSink"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ADLSSink')]",
+				"[concat(variables('factoryId'), '/datasets/AzureSynapseAnalyticsTable1')]"
 			]
 		}
 	]
