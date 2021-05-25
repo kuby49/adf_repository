@@ -83,6 +83,13 @@
 						"referenceName": "ExampleDataFlow",
 						"type": "DataFlowReference"
 					},
+					"staging": {
+						"linkedService": {
+							"referenceName": "ADLSSink",
+							"type": "LinkedServiceReference"
+						},
+						"folderPath": "data/dw-staging"
+					},
 					"compute": {
 						"coreCount": 8,
 						"computeType": "General"
