@@ -1,0 +1,10 @@
+{
+	"name": "ADLSSink",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://awdlstudrip.dfs.core.windows.net"
+		}
+	}
+}
