@@ -5,6 +5,9 @@
 		"factoryName": {
 			"value": "rip-data-factory"
 		},
+		"AzureDatabricks1_accessToken": {
+			"value": ""
+		},
 		"DWSynapseAnalytics_connectionString": {
 			"value": ""
 		},
